@@ -1,5 +1,5 @@
 # demo-es2
-
+Criação de um Power do Nestor bot para a apresentação sobre métodos ágeis em ES2. O power dará ao Nestor a possibilidade de listar os 10 próximos eventos da agenda e criar eventos simples na agenda.
 
 # Nestorbot Programming Manual
 
