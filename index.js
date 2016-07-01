@@ -32,8 +32,7 @@ module.exports = function(robot) {
   var google = require('googleapis');
   var googleAuth = require('google-auth-library');
 
-  // If modifying these scopes, delete your previously saved credentials
-  // at ~/.credentials/calendar-nodejs-quickstart.json
+
   var SCOPES = ['https://www.googleapis.com/auth/calendar'];
   var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
       process.env.USERPROFILE) + '/.credentials/';
@@ -58,7 +57,7 @@ module.exports = function(robot) {
   	fs.readFile(TOKEN_PATH, function(err, token) {
   	if (err) {
   	  //getNewToken(oauth2Client, callback);
-      return err;
+      return "erro: " + err;
   	} else {
   	  oauth2Client.credentials = JSON.parse(token);
   	  return callback(oauth2Client);
@@ -146,7 +145,7 @@ module.exports = function(robot) {
           var event = events[i];
           var start = event.start.dateTime || event.start.date;
           //console.log('%s - %s', start, event.summary);
-          result+= start " - " event.summary +'\n';
+          result+= start + " - " + event.summary +'\n';
         }
         return result;
       }
@@ -161,10 +160,11 @@ module.exports = function(robot) {
   	  resource: event,
   	}, function(err, event) {
   	  if (err) {
-  	    console.log('There was an error contacting the Calendar service: ' + err);
-  	    return;
+  	    //console.log('There was an error contacting the Calendar service: ' + err);
+  	    return 'There was an error contacting the Calendar service: ' + err;
   	  }
-  	  console.log('Event created: %s', event.htmlLink);
+  	  //console.log('Event created: %s', event.htmlLink);
+      return 'Event created: ' + event.htmlLink;
   	});
   }
 
@@ -187,22 +187,35 @@ module.exports = function(robot) {
       msg.send("Fim das coisas em msg.match");
       msg.send(JSON.stringify(event),done);
       */
+      msg.send("mentira",done);
 
     });
   });
 
+  var resultado;
+
+  function processClientSecrets(err, content) {
+    if (err) {
+      //console.log('Error loading client secret file: ' + err);
+      return 'Error loading client secret file: ' + err;
+    }
+    // Authorize a client with the loaded credentials, then call the
+    // Google Calendar API.
+    resultado = authorize(JSON.parse(content), listEvents);
+    return resultado;
+  }
+
+
   robot.respond("/liste eventos/i", function(msg, done){
     var retorno = "";
     // Load client secrets from a local file.
-    retorno = fs.readFile('client_secret.json', function processClientSecrets(err, content) {
-      if (err) {
-        //console.log('Error loading client secret file: ' + err);
-        return ('Error loading client secret file: ' + err);
-      }
-      // Authorize a client with the loaded credentials, then call the
-      // Google Calendar API.
-      return authorize(JSON.parse(content), listEvents);
-    });
-    msg.reply(retorno, done);
+    retorno = fs.readFile('client_secret.json', processClientSecrets);
+    if(retorno instanceof String){
+      msg.reply(retorno, done);
+    }
+    else{
+      msg.reply("algo de errado nao está certo " + resultado + " " + typeof(resultado));
+      msg.reply("Something went wrong " + typeof(retorno), done);
+    }
   });
 };
